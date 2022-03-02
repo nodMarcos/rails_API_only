@@ -1,6 +1,12 @@
 class KindsController < ApplicationController
+  # TOKEN = 'secret123'
   before_action :set_kind, only: [:show, :update, :destroy]
+  before_action :authenticate_user!
+  
+  # include ActionController::HttpAuthentication::Digest::ControllerMethods
+  # USERS = { "marquin" => Digest::MD5.hexdigest(["marquin","Application","secret"].join(":"))}
 
+  # include ActionController::HttpAuthentication::Token::ControllerMethods
   # GET /kinds
   def index
     @kinds = Kind.all
@@ -41,6 +47,10 @@ class KindsController < ApplicationController
   private
     # Use callbacks to share common setup or constraints between actions.
     def set_kind
+      if params[:contact_id]
+        @kind = Contact.find(params[:contact_id]).kind
+        return @kind
+      end
       @kind = Kind.find(params[:id])
     end
 
@@ -48,4 +58,14 @@ class KindsController < ApplicationController
     def kind_params
       params.require(:kind).permit(:description)
     end
+
+    # def authenticate
+    #   authenticate_or_request_with_http_token do |token, options|
+    #     hmac_secret = 'my$ecretK3y'
+    #     JWT.decode token, hmac_secret, true, { :algorithm => 'HS256' }
+    #   #   ActiveSupport::SecurityUtils.secure_compare(
+    #   #     ::Digest::SHA256.hexdigest(token),
+    #   #     ::Digest::SHA256.hexdigest(TOKEN)
+    #   #   )
+    # end
 end
